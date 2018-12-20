@@ -1,1 +1,395 @@
-hello worl
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Workflow</title>
+    <!-- Main CSS-->
+    <link rel="stylesheet" href="css/main.css">
+    <!-- Main JS-->
+    <script src="js/main.js"></script>
+     <!--Normalize CSS-->
+     <link rel="stylesheet" href="https://yarnpkg.com/en/package/normalize.css">
+     <!--Tailwinds-->
+     <link href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css" rel="stylesheet">
+     <!--Vue js-->
+     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+     <!--Lodash-->
+     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js"></script>
+     <!--Axios-->
+     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+     <!--Google fonts-->
+     <link href="https://fonts.googleapis.com/css?family=Quicksand" rel="stylesheet">
+     <!--Font Awesome-->
+     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+     <!--Moment-->
+     <script src="js/vendor/moment.min.js"></script>
+     <style>
+   
+     </style>
+
+  
+</head>
+<body>
+<div id="app">
+    <div class="mx-auto h-screen p-3">
+        <!--Titulo-->
+        <header class="contenedor">
+            <h2 class="w-full text-center text-lg fondo-blanco-sombra mb-4"></i>
+            Workflow
+        </h2>
+        </header>
+    
+        
+<!-- Columnas filtrando categorias -->
+<main class="contenedor text-center h-auto z-index-100 pb-8">
+    <!-- Cold -->
+    <div class="fondo-blanco-sombra">
+            <!--Titulo Cold-->
+            <div class="titulo-colores bg-blue-light "> 
+                <h4>Cold</h4> 
+                <div class="icono-colores"><img src="img/copo-de-nieve.svg" alt="icono"></div>
+            </div>
+            <!--Tareas Cold-->
+            <div class="flex h-full flex-col justify-between">
+                    <div>
+                <!--Tarea anyadida -->        
+                <div class="tareas borde-abajo" v-for="(tarea, index) in listaTareas" v-if="tarea.fields.categoria == 'cold'">
+                    
+                    <span class="flex justify-between">
+                        <!--Nombre de la tarea -->
+                        <p v-if="tarea.fields.editable == 'false'"> {{ tarea.fields.nombre | capital}}</p>
+                        
+                        <!--Boton flecha arriba - Ocultar submenu: al hacer click filtramos y quitamos la id que habiamos subido -->
+                        <button class="focus:outline-none"  @click="submenuCold = submenuCold.filter(mytarea => tarea.id == mytarea.id)" v-if="submenuCold.includes(tarea.id) && tarea.fields.editable == 'false'"><i class="text-grey-dark fas fa-caret-up"></i></button>
+                        <!--Boton flecha abajo - Mostrar submenu: al hacer click hacemos push para subir el tarea.id al array del submenu correspondiente-->
+                        <button class="focus:outline-none" @click="submenuCold.push(tarea.id)" v-if="!submenuCold.includes(tarea.id) && tarea.fields.editable == 'false'"><i class="text-grey-dark fas fa-caret-down"></i></button>
+                        
+                    </span>
+                    <!--Editar tarea-->
+                    <div v-if="tarea.fields.editable == 'true'" class="flex justify-between">
+                         <input class="bg-grey-lighter w-full p-2 rounded" type="text" v-model="nombreTareaEditadaCold" :placeholder="tarea.fields.nombre" @keyUp.enter="confirmarEdicion(index, nombreTareaEditadaCold)">
+                        <button class="h-auto flex items-center justify-center ml-1" :disabled="nombreTareaEditadaCold == ''" @click="confirmarEdicion(index, nombreTareaEditadaCold)"><i class="text-grey-dark text-2xl fas fa-check-circle"></i></i></button>
+                    </div>
+                    
+           <!--Submenu - Cold -->
+                    <div class="submenu mt-2" v-if="submenuCold.includes(tarea.id) && tarea.fields.editable == 'false'"> 
+                        <!--Boton editar -->
+                        <button class="botones-grises mt-2" @click="tarea.fields.editable = 'true'">
+                            <p>Editar</p>
+                            <i class="text-grey-dark text-xs fas fa-pen"></i>
+                        </button> 
+                        <!--Boton eliminar -->
+                        <button class="botones-grises" @click="borrarTarea(index)">
+                                <p>Eliminar</p>
+                                <i class="text-grey-dark text-xs  fas fa-trash"></i>
+                        </button>
+                        <!--Boton mover -->
+                        <div class="botones-grises">
+                                    <p>Mover</p>
+                                    <button @click="modificarCategoria(index, warm)"><i class="fas fa-circle text-yellow-dark"></i></button>
+                                    <button @click="modificarCategoria(index, hot)"><i class="fas fa-circle text-red-light"></i></button>
+                                    <button @click="modificarCategoria(index, enprogreso)"><i class="fas fa-circle text-orange"></i></button>
+                                    <button @click="modificarCategoria(index, enrevision)"><i class="fas fa-circle text-teal"></i></button>
+                                    <button @click="modificarCategoria(index, finalizada)"><i class="fas fa-circle text-green"></i></button>
+                        </div>
+                    </div>
+                <!--Fin Submenu - Cold -->
+                    </div> 
+                </div>
+                <!--Input y Boton Mas - Anyadir tarea -->
+                <div class="flex h-auto mt-4">
+                    <!--Al hacer clic al mas o enter al input, se ejecutara la funcion anyadir tareas y le pasaremos las variables de categoria y el v-model (dentro del parentesis)-->
+                    <input type="text" class="bg-grey-lighter w-full h-auto" v-model="nuevaTareaCold" placeholder="Nueva tarea"  @keyUp.enter="anyadirTareas('cold', nuevaTareaCold)">
+                    <button class="h-auto flex items-center justify-center ml-1" @click="anyadirTareas('cold', nuevaTareaCold)"><i class="text-grey-dark text-2xl fas fa-plus-circle"></i></i></button>
+                </div>
+            </div>
+        </div>
+        <!-- Warm -->
+        <div class="fondo-blanco-sombra">
+            <!-- Titulo Warm -->
+            <div class="titulo-colores bg-yellow-dark">
+                <h4 >Warm</h4>
+                <div class="icono-colores"><img src="img/viento.svg" alt="icono"></div>
+            </div>
+            <!-- Tareas Warm -->
+            <div class="flex h-full flex-col justify-between">
+                    <div>
+                <div class="tareas borde-abajo" v-for="(tarea, index) in listaTareas" v-if="tarea.fields.categoria == 'warm'">
+                    
+                    <span class="flex justify-between">
+                        <!-- Nombre tarea -->
+                        <p v-if="tarea.fields.editable == 'false'"> {{ tarea.fields.nombre | capital }}</p>
+                       <!--Boton flecha arriba - Ocultar submenu: al hacer click filtramos y quitamos la id que habiamos subido -->
+                       <button class="focus:outline-none"  @click="submenuWarm = submenuWarm.filter(mytarea => tarea.id == mytarea.id)" v-if="submenuWarm.includes(tarea.id) && tarea.fields.editable == 'false'"><i class="text-grey-dark fas fa-caret-up"></i></button>
+                       <!--Boton flecha abajo - Mostrar submenu: al hacer click hacemos push para subir el tarea.id al array del submenu correspondiente-->
+                       <button class="focus:outline-none" @click="submenuWarm.push(tarea.id)" v-if="!submenuWarm.includes(tarea.id) && tarea.fields.editable == 'false'"><i class="text-grey-dark fas fa-caret-down"></i></button>
+                    </span>
+                    <!--Editar tarea-->
+                    <div v-if="tarea.fields.editable == 'true'" class="flex justify-between">
+                        <input class="bg-grey-lighter w-full p-2 rounded" type="text" v-model="nombreTareaEditadaWarm" :placeholder="tarea.fields.nombre" @keyUp.enter="confirmarEdicion(index, nombreTareaEditadaWarm)">
+                       <button class="h-auto flex items-center justify-center ml-1" :disabled="nombreTareaEditadaWarm == ''" @click="confirmarEdicion(index, nombreTareaEditadaWarm)"><i class="text-grey-dark text-2xl fas fa-check-circle"></i></i></button>
+                   </div>
+            <!--Submenu-->
+            <div class="submenu mt-2" v-if="submenuWarm.includes(tarea.id) && tarea.fields.editable == 'false'"> 
+                        <!--Boton editar -->
+                        <button class="botones-grises mt-3" @click="tarea.fields.editable = 'true'">
+                            <p>Editar</p>
+                            <i class="text-grey-dark text-xs fas fa-pen"></i>
+                        </button> 
+                        <!--Boton eliminar -->
+                        <button class="botones-grises" @click="borrarTarea(index)">
+                                <p>Eliminar</p>
+                                <i class="text-grey-dark text-xs  fas fa-trash"></i>
+                        </button>
+                        <!--Boton mover -->
+                        <div class="botones-grises">
+                                    <p>Mover</p>
+                                    <button @click="modificarCategoria(index, cold)"><i class="fas fa-circle text-blue-light"></i></button>
+                                    <button @click="modificarCategoria(index, hot)"><i class="fas fa-circle text-red-light"></i></button>
+                                    <button @click="modificarCategoria(index, enprogreso)"><i class="fas fa-circle text-orange"></i></button>
+                                    <button @click="modificarCategoria(index, enrevision)"><i class="fas fa-circle text-teal"></i></button>
+                                    <button @click="modificarCategoria(index, finalizada)"><i class="fas fa-circle text-green"></i></button>
+                        </div>
+                        </div>
+                    </div> 
+                </div>
+                <!--Anyadir tarea: input y boton mas-->
+                <div class="flex h-auto mt-4">
+                    <input type="text" class="bg-grey-lighter w-full h-auto" v-model="nuevaTareaWarm" placeholder="Nueva tarea"  @keyUp.enter="anyadirTareas('warm', nuevaTareaWarm)">
+                    <button class="h-auto flex items-center justify-center ml-1" @click="anyadirTareas('warm', nuevaTareaWarm)"><i class="text-grey-dark text-2xl fas fa-plus-circle"></i></i></button>
+                </div>
+            </div>
+        </div>
+        <!-- Hot -->
+        <div class="fondo-blanco-sombra">
+            <!-- Titulo Hot -->
+            <div class="titulo-colores bg-red-light"> 
+                    <h4>Hot</h4> 
+                    <div class="icono-colores"><img  src="img/sol.svg" alt="icono"></div>
+            </div>
+            <!--Tareas Hot -->
+            <div class="flex h-full flex-col justify-between">
+                    <div>
+                <div class="tareas borde-abajo" v-for="(tarea, index) in listaTareas" v-if="tarea.fields.categoria == 'hot'">
+                    
+                    <span class="flex justify-between">
+                        <!--Nombre tarea-->
+                        <p v-if="tarea.fields.editable == 'false'"> {{ tarea.fields.nombre | capital }}</p>
+                        <!--Boton flecha arriba - Ocultar submenu: al hacer click filtramos y quitamos la id que habiamos subido -->
+                        <button class="focus:outline-none"  @click="submenuHot = submenuHot.filter(mytarea => tarea.id == mytarea.id)" v-if="submenuHot.includes(tarea.id) && tarea.fields.editable == 'false'"><i class="text-grey-dark fas fa-caret-up"></i></button>
+                        <!--Boton flecha abajo - Mostrar submenu: al hacer click hacemos push para subir el tarea.id al array del submenu correspondiente-->
+                        <button class="focus:outline-none" @click="submenuHot.push(tarea.id)" v-if="!submenuHot.includes(tarea.id) && tarea.fields.editable == 'false'"><i class="text-grey-dark fas fa-caret-down"></i></button>
+                        
+                    </span>
+                    <!--Editar tarea-->
+                    <div v-if="tarea.fields.editable == 'true'" class="flex justify-between">
+                        <input class="bg-grey-lighter w-full p-2 rounded" type="text" v-model="nombreTareaEditadaHot" :placeholder="tarea.fields.nombre" @keyUp.enter="confirmarEdicion(index, nombreTareaEditadaHot)">
+                       <button class="h-auto flex items-center justify-center ml-1" :disabled="nombreTareaEditadaHot == ''" @click="confirmarEdicion(index, nombreTareaEditadaHot)"><i class="text-grey-dark text-2xl fas fa-check-circle"></i></i></button>
+                   </div>
+                    <!--Submenu -->
+                    <div class="submenu mt-2" v-if="submenuHot.includes(tarea.id) && tarea.fields.editable == 'false'"> 
+                        <!--Boton editar -->
+                        <button class="botones-grises mt-3" @click="tarea.fields.editable = 'true'">
+                            <p>Editar</p>
+                            <i class="text-grey-dark text-xs fas fa-pen"></i>
+                        </button> 
+                        <!--Boton eliminar -->
+                        <button class="botones-grises" @click="borrarTarea(index)">
+                                <p>Eliminar</p>
+                                <i class="text-grey-dark text-xs  fas fa-trash"></i>
+                        </button>
+                        <!--Boton mover -->
+                        <div class="botones-grises">
+                                    <p>Mover</p>
+                                    <button @click="modificarCategoria(index, cold)"><i class="fas fa-circle text-blue-light"></i></button>
+                                    <button @click="modificarCategoria(index, warm)"><i class="fas fa-circle text-yellow-dark"></i></button>
+                                    <button @click="modificarCategoria(index, enprogreso)"><i class="fas fa-circle text-orange"></i></button>
+                                    <button @click="modificarCategoria(index, enrevision)"><i class="fas fa-circle text-teal"></i></button>
+                                    <button @click="modificarCategoria(index, finalizada)"><i class="fas fa-circle text-green"></i></button>
+                        </div>
+                        </div>
+                    </div> 
+                </div>
+                <!--Anyadir tarea: input y boton mas-->
+                <div class="flex h-auto mt-4">
+                    <input type="text" class="bg-grey-lighter w-full h-auto" v-model="nuevaTareaHot" placeholder="Nueva tarea"  @keyUp.enter="anyadirTareas('hot', nuevaTareaHot)">
+                    <button class="h-auto flex items-center justify-center ml-1" @click="anyadirTareas('hot', nuevaTareaHot)"><i class="text-grey-dark text-2xl fas fa-plus-circle"></i></i></button>
+                </div>
+            </div>
+        </div>
+        <!-- En progreso -->
+        <div class="fondo-blanco-sombra"> 
+             <!-- Titulo En progreso -->
+             <div class=" titulo-colores bg-orange"> 
+                    <h4>En progreso</h4> 
+                    <div class="icono-peq-colores"><img src="img/refrescar.svg" alt="icono"></div>
+            </div>
+            <!--Tareas En progreso -->
+            <div class="flex h-full flex-col justify-between">
+                    <div>
+                <div class="tareas borde-abajo" v-for="(tarea, index) in listaTareas" v-if="tarea.fields.categoria == 'enprogreso'">
+                    
+                    <span class="flex justify-between">
+                        <!--Nombre tarea-->
+                        <p v-if="tarea.fields.editable == 'false'"> {{ tarea.fields.nombre | capital }}</p>
+                         <!--Boton flecha arriba - Ocultar submenu: al hacer click filtramos y quitamos la id que habiamos subido -->
+                         <button class="focus:outline-none"  @click="submenuEnprogreso = submenuEnprogreso.filter(mytarea => tarea.id == mytarea.id)" v-if="submenuEnprogreso.includes(tarea.id) && tarea.fields.editable == 'false'"><i class="text-grey-dark fas fa-caret-up"></i></button>
+                        <!--Boton flecha abajo - Mostrar submenu: al hacer click hacemos push para subir el tarea.id al array del submenu correspondiente-->
+                        <button class="focus:outline-none" @click="submenuEnprogreso.push(tarea.id)" v-if="!submenuEnprogreso.includes(tarea.id) && tarea.fields.editable == 'false'"><i class="text-grey-dark fas fa-caret-down"></i></button>
+                       
+                    </span>
+                   <!--Editar tarea-->
+                   <div v-if="tarea.fields.editable == 'true'" class="flex justify-between">
+                    <input class="bg-grey-lighter w-full p-2 rounded" type="text" v-model="nombreTareaEditadaEnprogreso" :placeholder="tarea.fields.nombre" @keyUp.enter="confirmarEdicion(index, nombreTareaEditadaEnprogreso)">
+                   <button class="h-auto flex items-center justify-center ml-1" :disabled="nombreTareaEditadaEnprogreso == ''" @click="confirmarEdicion(index, nombreTareaEditadaEnprogreso)"><i class="text-grey-dark text-2xl fas fa-check-circle"></i></i></button>
+               </div>
+                    <!--Submenu-->
+                    <div class="submenu mt-2" v-if="submenuEnprogreso.includes(tarea.id) && tarea.fields.editable == 'false'"> 
+                        <!--Boton editar -->
+                        <button class="botones-grises mt-3" @click="tarea.fields.editable = 'true'">
+                            <p>Editar</p>
+                            <i class="text-grey-dark text-xs fas fa-pen"></i>
+                        </button> 
+                        <!--Boton eliminar -->
+                        <button class="botones-grises" @click="borrarTarea(index)">
+                                <p>Eliminar</p>
+                                <i class="text-grey-dark text-xs  fas fa-trash"></i>
+                        </button>
+                        <!--Boton mover -->
+                        <div class="botones-grises">
+                                    <p>Mover</p>
+                                    <button @click="modificarCategoria(index, cold)"><i class="fas fa-circle text-blue-light"></i></button>
+                                    <button @click="modificarCategoria(index, warm)"><i class="fas fa-circle text-yellow-dark"></i></button>
+                                    <button @click="modificarCategoria(index, hot)"><i class="fas fa-circle text-red-light"></i></button>
+                                    <button @click="modificarCategoria(index, enrevision)"><i class="fas fa-circle text-teal"></i></button>
+                                    <button @click="modificarCategoria(index, finalizada)"><i class="fas fa-circle text-green"></i></button>
+                        </div>
+                        </div>
+                    </div> 
+                </div>
+                <!--Anyadir tarea: input y boton mas-->
+                <div class="flex h-auto mt-4">
+                    <input type="text" class="bg-grey-lighter w-full h-auto" v-model="nuevaTareaEnprogreso" placeholder="Nueva tarea"  @keyUp.enter="anyadirTareas('enprogreso', nuevaTareaEnprogreso)">
+                    <button class="h-auto flex items-center justify-center ml-1" @click="anyadirTareas('enprogreso', nuevaTareaEnprogreso)"><i class="text-grey-dark text-2xl fas fa-plus-circle"></i></i></button>
+                </div>
+            </div>
+        </div>
+        <!-- En revisión -->
+        <div class="fondo-blanco-sombra">
+            <!-- Titulo En revision -->
+            <div class="titulo-colores bg-teal"> 
+                    <h4>En revisión</h4> 
+                    <div class="icono-colores"><img  src="img/ver.svg" alt="icono"></div>
+            </div>
+            <!--Tareas En revision -->
+            <div class="flex h-full flex-col justify-between">
+                    <div>
+                <div class="tareas borde-abajo" v-for="(tarea, index) in listaTareas" v-if="tarea.fields.categoria == 'enrevision'">
+                    
+                    <span class="flex justify-between">
+                        <!--Nombre tarea-->
+                        <p v-if="tarea.fields.editable == 'false'"> {{ tarea.fields.nombre | capital }}</p>
+                        <!--Boton flecha arriba - Ocultar submenu: al hacer click filtramos y quitamos la id que habiamos subido -->
+                        <button class="focus:outline-none"  @click="submenuEnrevision = submenuEnrevision.filter(mytarea => tarea.id == mytarea.id)" v-if="submenuEnrevision.includes(tarea.id) && tarea.fields.editable == 'false'"><i class="text-grey-dark fas fa-caret-up"></i></button>
+                        <!--Boton flecha abajo - Mostrar submenu: al hacer click hacemos push para subir el tarea.id al array del submenu correspondiente-->
+                        <button class="focus:outline-none" @click="submenuEnrevision.push(tarea.id)" v-if="!submenuEnrevision.includes(tarea.id) && tarea.fields.editable == 'false'"><i class="text-grey-dark fas fa-caret-down"></i></button>
+                    </span>
+                    <!--Editar tarea-->
+                    <div v-if="tarea.fields.editable == 'true'" class="flex justify-between">
+                        <input class="bg-grey-lighter w-full p-2 rounded" type="text" v-model="nombreTareaEditadaEnrevision" :placeholder="tarea.fields.nombre" @keyUp.enter="confirmarEdicion(index, nombreTareaEditadaEnrevision)">
+                       <button class="h-auto flex items-center justify-center ml-1" :disabled="nombreTareaEditadaEnrevision == ''" @click="confirmarEdicion(index, nombreTareaEditadaEnrevision)"><i class="text-grey-dark text-2xl fas fa-check-circle"></i></i></button>
+                   </div>
+                    <!--Submenu-->
+                    <div class="submenu mt-2" v-if="submenuEnrevision.includes(tarea.id) && tarea.fields.editable == 'false'">  
+                        <!--Boton editar -->
+                        <button class="botones-grises mt-3" @click="tarea.fields.editable = 'true'">
+                            <p>Editar</p>
+                            <i class="text-grey-dark text-xs fas fa-pen"></i>
+                        </button> 
+                        <!--Boton eliminar -->
+                        <button class="botones-grises" @click="borrarTarea(index)">
+                                <p>Eliminar</p>
+                                <i class="text-grey-dark text-xs  fas fa-trash"></i>
+                        </button>
+                        <!--Boton mover -->
+                        <div class="botones-grises">
+                                    <p>Mover</p>
+                                    <button @click="modificarCategoria(index, cold)"><i class="fas fa-circle text-blue-light"></i></button>
+                                    <button @click="modificarCategoria(index, warm)"><i class="fas fa-circle text-yellow-dark"></i></button>
+                                    <button @click="modificarCategoria(index, hot)"><i class="fas fa-circle text-red-light"></i></button>
+                                    <button @click="modificarCategoria(index, enprogreso)"><i class="fas fa-circle text-orange"></i></button>
+                                    <button @click="modificarCategoria(index, finalizada)"><i class="fas fa-circle text-green"></i></button>
+                        </div>
+                        </div>
+                    </div> 
+                </div>
+                <!--Anyadir tarea: input y boton mas-->
+                <div class="flex h-auto mt-4">
+                    <input type="text" class="bg-grey-lighter w-full h-auto" v-model="nuevaTareaEnrevision" placeholder="Nueva tarea"  @keyUp.enter="anyadirTareas('enrevision', nuevaTareaEnrevision)">
+                    <button class="h-auto flex items-center justify-center ml-1" @click="anyadirTareas('enrevision', nuevaTareaEnrevision)"><i class="text-grey-dark text-2xl fas fa-plus-circle"></i></i></button>
+                </div>
+            </div>
+        </div>
+        <!-- Finalizada -->
+        <div class="fondo-blanco-sombra">
+             <!-- Titulo Finalizada -->
+                <div class="titulo-colores bg-green"> 
+                        <h4>Finalizada</h4> 
+                        <div class="icono-colores"><img src="img/verificado.svg" alt="icono"></div>
+                </div>
+                <!--Tareas Finalizada -->
+                <div class="flex h-full flex-col justify-between">
+                        <div>
+                    <div class="tareas borde-abajo" v-for="(tarea, index) in listaTareas" v-if="tarea.fields.categoria == 'finalizada'">
+                        
+                        <span class="flex justify-between">
+                            <!--Nombre tarea-->
+                            <p v-if="tarea.fields.editable == 'false'"> {{ tarea.fields.nombre }}</p>
+                            <!--Boton flecha arriba - Ocultar submenu: al hacer click filtramos y quitamos la id que habiamos subido -->
+                            <button class="focus:outline-none"  @click="submenuFinalizada = submenuFinalizada.filter(mytarea => tarea.id == mytarea.id)" v-if="submenuFinalizada.includes(tarea.id) && tarea.fields.editable == 'false'"><i class="text-grey-dark fas fa-caret-up"></i></button>
+                            <!--Boton flecha abajo - Mostrar submenu: al hacer click hacemos push para subir el tarea.id al array del submenu correspondiente-->
+                            <button class="focus:outline-none" @click="submenuFinalizada.push(tarea.id)" v-if="!submenuFinalizada.includes(tarea.id) && tarea.fields.editable == 'false'"><i class="text-grey-dark fas fa-caret-down"></i></button>
+                            
+                        </span>
+                        <!--Editar tarea-->
+                    <div v-if="tarea.fields.editable == 'true'" class="flex justify-between">
+                        <input class="bg-grey-lighter w-full p-2 rounded" type="text" v-model="nombreTareaEditadaFinalizada" :placeholder="tarea.fields.nombre" @keyUp.enter="confirmarEdicion(index, nombreTareaEditadaFinalizada)">
+                       <button class="h-auto flex items-center justify-center ml-1" :disabled="nombreTareaEditadaFinalizada == ''" @click="confirmarEdicion(index, nombreTareaEditadaFinalizada)"><i class="text-grey-dark text-2xl fas fa-check-circle"></i></i></button>
+                   </div>
+                        <!--Submenu-->
+                        <div class="submenu mt-2" v-if="submenuFinalizada.includes(tarea.id) && tarea.fields.editable == 'false'">  
+                            <!--Boton editar -->
+                            <button class="botones-grises mt-3" @click="tarea.fields.editable = 'true'">
+                                <p>Editar</p>
+                                <i class="text-grey-dark text-xs fas fa-pen"></i>
+                            </button> 
+                            <!--Boton eliminar -->
+                            <button class="botones-grises" @click="borrarTarea(index)">
+                                    <p>Eliminar</p>
+                                    <i class="text-grey-dark text-xs  fas fa-trash"></i>
+                            </button>
+                            
+                            
+                            </div>
+                        </div> 
+                    </div>
+                    
+                    <h3 class="text-center text-green bold h-auto mt-4">Por fin!!!</h3>
+                </div>
+        </div>
+
+        
+        <!--Fin Tareas Finalizadas-->
+    </main>
+     <!--Fin main-->
+       
+    </div>
+    <!--Fin div mx-auto-->
+    <div class="imagenes-inferior"></div>
+</div>
+
+<!--Fin div app-->
+</body>
+</html>
